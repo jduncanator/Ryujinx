@@ -115,7 +115,11 @@ namespace ChocolArm64.Translation
                 EmitCondBranch(lblSkip, GetInverseCond(op.Cond));
             }
 
+            _ilBlock.Add(new ILInstStart(_opcIndex, CurrOp));
+
             CurrOp.Emitter(this);
+
+            _ilBlock.Add(new ILInstEnd(_opcIndex, CurrOp));
 
             if (lblSkip != null)
             {

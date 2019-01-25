@@ -11,6 +11,7 @@ namespace ChocolArm64.Decoders
 
         public int OpCodeSizeInBytes { get; protected set; } = 4;
 
+        public Inst         Instruction  { get; protected set; }
         public InstEmitter  Emitter      { get; protected set; }
         public RegisterSize RegisterSize { get; protected set; }
 
@@ -21,7 +22,8 @@ namespace ChocolArm64.Decoders
 
             RegisterSize = RegisterSize.Int64;
 
-            Emitter = inst.Emitter;
+            Instruction = inst;
+            Emitter     = inst.Emitter;
         }
 
         public int GetBitsCount()

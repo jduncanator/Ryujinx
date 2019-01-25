@@ -1,4 +1,6 @@
+using ChocolArm64.Introspection;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace ChocolArm64.Translation
 {
@@ -67,6 +69,29 @@ namespace ChocolArm64.Translation
         {
             foreach (IILEmit ilEmitter in _emitters)
             {
+                if (ilEmitter is ILInstStart start)
+                {
+                    var bound = new ILInstructionBound {
+                        OpCode = start.OpCode,
+                        Timer = Stopwatch.StartNew(),
+                        ILStart = context.Generator.ILOffset,
+                        ILEnd = context.Generator.ILOffset
+                    };
+
+                    context.InstructionBoundStack.Push(bound);
+                }
+
+                if (ilEmitter is ILInstEnd end)
+                {
+                    var bound = context.InstructionBoundStack.Pop();
+
+                    bound.Timer.Stop();
+
+                    bound.ILEnd = context.Generator.ILOffset;
+
+                    context.InstructionBounds.Add(bound);
+                }
+
                 ilEmitter.Emit(context);
             }
         }

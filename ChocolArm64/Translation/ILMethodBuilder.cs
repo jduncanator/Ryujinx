@@ -1,6 +1,8 @@
+using ChocolArm64.Introspection;
 using ChocolArm64.State;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection.Emit;
 using System.Runtime.Intrinsics;
 
@@ -9,6 +11,10 @@ namespace ChocolArm64.Translation
     class ILMethodBuilder
     {
         public LocalAlloc LocalAlloc { get; private set; }
+
+        public List<ILInstructionBound> InstructionBounds { get; set; }
+
+        public Stack<ILInstructionBound> InstructionBoundStack { get; set; }
 
         public ILGenerator Generator { get; private set; }
 
@@ -24,6 +30,9 @@ namespace ChocolArm64.Translation
         {
             _ilBlocks = ilBlocks;
             _subName  = subName;
+
+            InstructionBounds = new List<ILInstructionBound>();
+            InstructionBoundStack = new Stack<ILInstructionBound>();
         }
 
         public TranslatedSub GetSubroutine()
@@ -72,6 +81,8 @@ namespace ChocolArm64.Translation
             {
                 ilBlock.Emit(this);
             }
+
+            ProcessInstructionIntrospection();
 
             return subroutine;
         }
@@ -139,6 +150,41 @@ namespace ChocolArm64.Translation
         public static bool IsRegIndex(int index)
         {
             return (uint)index < 32;
+        }
+
+        private void ProcessInstructionIntrospection()
+        {
+            var il = Generator.GetType()
+                              .GetMethod(
+                                  "BakeByteArray",
+                                  System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance
+                              ).Invoke(Generator, null) as byte[];
+
+            foreach (var bound in InstructionBounds)
+            {
+                var opcode = bound.OpCode;
+                var start = bound.ILStart;
+                var end = bound.ILEnd;
+
+                var instructions = ILReader.ReadInstructions(il, start, end).ToArray();
+
+                if (instructions.Length > 400)
+                {
+                    Console.WriteLine("Instruction {0} ({1}) emits {2} instructions:", opcode.Instruction.Emitter.Method.Name, opcode.Instruction.Type.Name, instructions.Length);
+
+                    foreach (var instruction in instructions)
+                    {
+                        Console.WriteLine("\tIL_{0:X4}:  {1}", start, instruction.OpCode.Name);
+                        start += instruction.OpCode.Size;
+                        start += instruction.OperandSize;
+                    }
+                }
+
+                ILIntrospectionCounter.Track(opcode, bound.Timer.ElapsedTicks, instructions.Length);
+            }
+
+            InstructionBounds.Clear();
+            InstructionBoundStack.Clear();
         }
     }
 }
