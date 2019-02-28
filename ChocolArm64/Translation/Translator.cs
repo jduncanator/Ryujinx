@@ -1,5 +1,6 @@
 using ChocolArm64.Decoders;
 using ChocolArm64.Events;
+using ChocolArm64.Marshalling;
 using ChocolArm64.Memory;
 using ChocolArm64.State;
 using System;
@@ -34,6 +35,51 @@ namespace ChocolArm64.Translation
 
             _cache = new TranslatorCache();
             _queue = new TranslatorQueue();
+        }
+
+        public void RegisterHook<T>(long position, T method)
+            where T : Delegate
+        {
+            if(!TryRegisterHook<T>(position, method))
+            {
+                // TODO: Throw proper exception type
+                throw new Exception("Hook already registered");
+            }
+        }
+
+        public bool TryRegisterHook<T>(long position, T method)
+            where T : Delegate
+        {
+            var thunk = MarshalAarch64.CreateMarshalThunk<T>(method);
+
+
+            return false;
+        }
+
+        public void UnregisterHook(long position)
+        {
+            if (!TryUnregisterHook(position))
+            {
+                // TODO: Throw proper exception type
+                throw new Exception("Hook not registered");
+            }
+        }
+
+        public bool TryUnregisterHook(long position)
+        {
+            return false;
+        }
+
+        public T GetGuestFunctionDelegate<T>(long position)
+            where T : Delegate
+        {
+            if (!_cache.TryGetSubroutine(position, out var translatedSub))
+            {
+                // TODO: Throw proper exception
+                throw new Exception("Cannot locate translated subroutine in cache.");
+            }
+
+            return MarshalAarch64.CreateUnmarshalThunk<T>(translatedSub.Delegate);
         }
 
         internal void ExecuteSubroutine(CpuThread thread, long position)

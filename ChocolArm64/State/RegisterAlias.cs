@@ -36,6 +36,7 @@ namespace ChocolArm64.State
         public const int Aarch32Pc = 15;
 
         public const int Lr = 30;
+        public const int Sp = 31;
         public const int Zr = 31;
     }
 }
