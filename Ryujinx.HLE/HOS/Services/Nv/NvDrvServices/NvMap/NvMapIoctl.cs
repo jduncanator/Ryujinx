@@ -1,7 +1,7 @@
 using ARMeilleure.Memory;
 using Ryujinx.Common;
 using Ryujinx.Common.Logging;
-using Ryujinx.Graphics.Memory;
+using Ryujinx.Graphics.Gpu.Memory;
 using Ryujinx.HLE.HOS.Kernel.Process;
 using System.Collections.Concurrent;
 
@@ -9,6 +9,8 @@ namespace Ryujinx.HLE.HOS.Services.Nv.NvDrvServices.NvMap
 {
     class NvMapIoctl
     {
+        private const int PageSize = 4096;
+
         private const int FlagNotFreedYet = 1;
 
         private static ConcurrentDictionary<KProcess, IdDictionary> _maps;
@@ -49,7 +51,7 @@ namespace Ryujinx.HLE.HOS.Services.Nv.NvDrvServices.NvMap
                 return NvResult.InvalidInput;
             }
 
-            int size = BitUtils.AlignUp(args.Size, NvGpuVmm.PageSize);
+            int size = BitUtils.AlignUp(args.Size, PageSize);
 
             args.Handle = AddNvMap(context, new NvMapHandle(size));
 
@@ -108,9 +110,9 @@ namespace Ryujinx.HLE.HOS.Services.Nv.NvDrvServices.NvMap
                 return NvResult.InvalidInput;
             }
 
-            if ((uint)args.Align < NvGpuVmm.PageSize)
+            if ((uint)args.Align < PageSize)
             {
-                args.Align = NvGpuVmm.PageSize;
+                args.Align = PageSize;
             }
 
             int result = NvResult.Success;
@@ -122,7 +124,7 @@ namespace Ryujinx.HLE.HOS.Services.Nv.NvDrvServices.NvMap
                 map.Align =       args.Align;
                 map.Kind  = (byte)args.Kind;
 
-                int size = BitUtils.AlignUp(map.Size, NvGpuVmm.PageSize);
+                int size = BitUtils.AlignUp(map.Size, PageSize);
 
                 long address = args.Address;
 

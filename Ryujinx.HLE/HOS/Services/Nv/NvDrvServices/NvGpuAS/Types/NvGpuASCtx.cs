@@ -1,11 +1,12 @@
-using Ryujinx.Graphics.Memory;
+using Ryujinx.Graphics.Gpu.Memory;
+using System;
 using System.Collections.Generic;
 
 namespace Ryujinx.HLE.HOS.Services.Nv.NvDrvServices.NvGpuAS
 {
     class NvGpuASCtx
     {
-        public NvGpuVmm Vmm { get; private set; }
+        public MemoryManager Vmm { get; private set; }
 
         private class Range
         {
@@ -38,9 +39,43 @@ namespace Ryujinx.HLE.HOS.Services.Nv.NvDrvServices.NvGpuAS
         private SortedList<long, Range> _maps;
         private SortedList<long, Range> _reservations;
 
+        private class MemoryProxy : IPhysicalMemory
+        {
+            private ARMeilleure.Memory.MemoryManager _cpuMemory;
+
+            public MemoryProxy(ARMeilleure.Memory.MemoryManager cpuMemory)
+            {
+                _cpuMemory = cpuMemory;
+            }
+
+            public Span<byte> Read(ulong address, ulong size)
+            {
+                return _cpuMemory.ReadBytes((long)address, (long)size);
+            }
+
+            public void Write(ulong address, Span<byte> data)
+            {
+                _cpuMemory.WriteBytes((long)address, data.ToArray());
+            }
+
+            public (ulong, ulong)[] GetModifiedRanges(ulong address, ulong size)
+            {
+                return _cpuMemory.GetModifiedRanges(address, size);
+            }
+
+            public int GetPageSize()
+            {
+                return 4096;
+            }
+        }
+
         public NvGpuASCtx(ServiceCtx context)
         {
-            Vmm = new NvGpuVmm(context.Memory);
+            var memoryProxy = new MemoryProxy(context.Memory);
+
+            context.Device.Gpu.SetVmm(memoryProxy);
+
+            Vmm = context.Device.Gpu.MemoryManager;
 
             _maps         = new SortedList<long, Range>();
             _reservations = new SortedList<long, Range>();
@@ -57,7 +92,7 @@ namespace Ryujinx.HLE.HOS.Services.Nv.NvDrvServices.NvGpuAS
             }
 
             // Check if address is page aligned.
-            if ((position & NvGpuVmm.PageMask) != 0)
+            if ((position & (long)MemoryManager.PageMask) != 0)
             {
                 return false;
             }

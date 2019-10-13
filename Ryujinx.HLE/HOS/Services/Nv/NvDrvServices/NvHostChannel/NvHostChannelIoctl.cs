@@ -1,6 +1,5 @@
 using ARMeilleure.Memory;
 using Ryujinx.Common.Logging;
-using Ryujinx.Graphics.Memory;
 using Ryujinx.HLE.HOS.Kernel.Process;
 using Ryujinx.HLE.HOS.Services.Nv.NvDrvServices.NvGpuAS;
 using Ryujinx.HLE.HOS.Services.Nv.NvDrvServices.NvMap;
@@ -51,7 +50,7 @@ namespace Ryujinx.HLE.HOS.Services.Nv.NvDrvServices.NvHostChannel
 
             NvHostChannelSubmit args = MemoryHelper.Read<NvHostChannelSubmit>(context.Memory, inputPosition);
 
-            NvGpuVmm vmm = NvGpuASIoctl.GetASCtx(context).Vmm;
+            var vmm = NvGpuASIoctl.GetASCtx(context).Vmm;
 
             for (int index = 0; index < args.CmdBufsCount; index++)
             {
@@ -68,7 +67,7 @@ namespace Ryujinx.HLE.HOS.Services.Nv.NvDrvServices.NvHostChannel
                     cmdBufData[offset] = context.Memory.ReadInt32(map.Address + cmdBuf.Offset + offset * 4);
                 }
 
-                context.Device.Gpu.PushCommandBuffer(vmm, cmdBufData);
+                // context.Device.Gpu.PushCommandBuffer(vmm, cmdBufData);
             }
 
             // TODO: Relocation, waitchecks, etc.
@@ -125,7 +124,7 @@ namespace Ryujinx.HLE.HOS.Services.Nv.NvDrvServices.NvHostChannel
 
             NvHostChannelMapBuffer args = MemoryHelper.Read<NvHostChannelMapBuffer>(context.Memory, inputPosition);
 
-            NvGpuVmm vmm = NvGpuASIoctl.GetASCtx(context).Vmm;
+            var vmm = NvGpuASIoctl.GetASCtx(context).Vmm;
 
             for (int index = 0; index < args.NumEntries; index++)
             {
@@ -144,7 +143,7 @@ namespace Ryujinx.HLE.HOS.Services.Nv.NvDrvServices.NvHostChannel
                 {
                     if (map.DmaMapAddress == 0)
                     {
-                        map.DmaMapAddress = vmm.MapLow(map.Address, map.Size);
+                        map.DmaMapAddress = (long)vmm.MapLow((ulong)map.Address, (ulong)map.Size);
                     }
 
                     context.Memory.WriteInt32(outputPosition + 0xc + 4 + index * 8, (int)map.DmaMapAddress);
@@ -160,7 +159,7 @@ namespace Ryujinx.HLE.HOS.Services.Nv.NvDrvServices.NvHostChannel
 
             NvHostChannelMapBuffer args = MemoryHelper.Read<NvHostChannelMapBuffer>(context.Memory, inputPosition);
 
-            NvGpuVmm vmm = NvGpuASIoctl.GetASCtx(context).Vmm;
+            var vmm = NvGpuASIoctl.GetASCtx(context).Vmm;
 
             for (int index = 0; index < args.NumEntries; index++)
             {
@@ -179,7 +178,7 @@ namespace Ryujinx.HLE.HOS.Services.Nv.NvDrvServices.NvHostChannel
                 {
                     if (map.DmaMapAddress != 0)
                     {
-                        vmm.Free(map.DmaMapAddress, map.Size);
+                        vmm.Free((ulong)map.DmaMapAddress, (ulong)map.Size);
 
                         map.DmaMapAddress = 0;
                     }
@@ -227,13 +226,13 @@ namespace Ryujinx.HLE.HOS.Services.Nv.NvDrvServices.NvHostChannel
 
             NvHostChannelSubmitGpfifo args = MemoryHelper.Read<NvHostChannelSubmitGpfifo>(context.Memory, inputPosition);
 
-            NvGpuVmm vmm = NvGpuASIoctl.GetASCtx(context).Vmm;
+            var vmm = NvGpuASIoctl.GetASCtx(context).Vmm;
 
             for (int index = 0; index < args.NumEntries; index++)
             {
                 long gpfifo = context.Memory.ReadInt64(inputPosition + 0x18 + index * 8);
 
-                PushGpfifo(context, vmm, gpfifo);
+                PushGpfifo(context, gpfifo);
             }
 
             args.SyncptId    = 0;
@@ -317,13 +316,13 @@ namespace Ryujinx.HLE.HOS.Services.Nv.NvDrvServices.NvHostChannel
 
             NvHostChannelSubmitGpfifo args = MemoryHelper.Read<NvHostChannelSubmitGpfifo>(context.Memory, inputPosition);
 
-            NvGpuVmm vmm = NvGpuASIoctl.GetASCtx(context).Vmm;
+            var vmm = NvGpuASIoctl.GetASCtx(context).Vmm;
 
             for (int index = 0; index < args.NumEntries; index++)
             {
                 long gpfifo = context.Memory.ReadInt64(args.Address + index * 8);
 
-                PushGpfifo(context, vmm, gpfifo);
+                PushGpfifo(context, gpfifo);
             }
 
             args.SyncptId    = 0;
@@ -353,9 +352,9 @@ namespace Ryujinx.HLE.HOS.Services.Nv.NvDrvServices.NvHostChannel
             return NvResult.Success;
         }
 
-        private static void PushGpfifo(ServiceCtx context, NvGpuVmm vmm, long gpfifo)
+        private static void PushGpfifo(ServiceCtx context, long gpfifo)
         {
-            context.Device.Gpu.Pusher.Push(vmm, gpfifo);
+            context.Device.Gpu.DmaPusher.Push((ulong)gpfifo);
         }
 
         public static NvChannel GetChannel(ServiceCtx context)
