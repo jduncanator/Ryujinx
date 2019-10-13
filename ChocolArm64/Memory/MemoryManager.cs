@@ -1,5 +1,6 @@
 using ChocolArm64.Instructions;
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics;
@@ -256,6 +257,59 @@ namespace ChocolArm64.Memory
             }
 
             return ptePtr;
+        }
+
+        public unsafe (ulong, ulong)[] GetModifiedRanges(ulong address, ulong size)
+        {
+            List<(ulong, ulong)> ranges = new List<(ulong, ulong)>();
+
+            ulong endAddress = (address + size + PageMask) & ~(ulong)PageMask;
+
+            address &= ~(ulong)PageMask;
+
+            ulong currAddr = address;
+            ulong currSize = 0;
+
+            while (address < endAddress)
+            {
+                if (IsValidPosition((long)address))
+                {
+                    byte* ptr = ((byte**)_pageTable)[address >> PageBits];
+
+                    ulong ptrUlong = (ulong)ptr;
+
+                    if ((ptrUlong & PteFlagNotModified) == 0)
+                    {
+                        // Modified.
+                        currSize += PageSize;
+
+                        SetPtEntryFlag((long)address, PteFlagNotModified);
+                    }
+                    else
+                    {
+                        if (currSize != 0)
+                        {
+                            ranges.Add((currAddr, currSize));
+                        }
+
+                        currAddr = address + PageSize;
+                        currSize = 0;
+                    }
+                }
+                else
+                {
+                    currSize += PageSize;
+                }
+
+                address += PageSize;
+            }
+
+            if (currSize != 0)
+            {
+                ranges.Add((currAddr, currSize));
+            }
+
+            return ranges.ToArray();
         }
 
         public bool IsRegionModified(long position, long size)

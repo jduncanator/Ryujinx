@@ -3,8 +3,7 @@ using Gtk;
 using GUI = Gtk.Builder.ObjectAttribute;
 using Ryujinx.Audio;
 using Ryujinx.Common.Logging;
-using Ryujinx.Graphics.Gal;
-using Ryujinx.Graphics.Gal.OpenGL;
+using Ryujinx.Graphics.OpenGL;
 using Ryujinx.Profiler;
 using System;
 using System.Diagnostics;
@@ -20,7 +19,7 @@ namespace Ryujinx.UI
     {
         internal static HLE.Switch _device;
 
-        private static IGalRenderer _renderer;
+        private static Renderer _renderer;
 
         private static IAalOutput _audioOut;
 
@@ -60,7 +59,7 @@ namespace Ryujinx.UI
 
         private MainWindow(Builder builder, string[] args, Application gtkApplication) : base(builder.GetObject("_mainWin").Handle)
         {
-            _renderer = new OglRenderer();
+            _renderer = new Renderer();
 
             _audioOut = InitializeAudioEngine();
 
@@ -346,7 +345,7 @@ namespace Ryujinx.UI
         private static void CreateGameWindow()
         {
             Configuration.ConfigureHid(_device, SwitchSettings.SwitchConfig);
-            
+
             using (GlScreen screen = new GlScreen(_device, _renderer))
             {
                 screen.MainLoop();
@@ -408,11 +407,11 @@ namespace Ryujinx.UI
         /// <returns>An <see cref="IAalOutput"/> supported by this machine</returns>
         private static IAalOutput InitializeAudioEngine()
         {
-            if (SoundIoAudioOut.IsSupported)
+            /*if (SoundIoAudioOut.IsSupported)
             {
                 return new SoundIoAudioOut();
             }
-            else if (OpenALAudioOut.IsSupported)
+            else*/ if (OpenALAudioOut.IsSupported)
             {
                 return new OpenALAudioOut();
             }

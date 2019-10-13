@@ -3,6 +3,7 @@ using LibHac.FsSystem;
 using OpenTK.Input;
 using Ryujinx.Common;
 using Ryujinx.Common.Logging;
+using Ryujinx.Graphics.Gpu;
 using Ryujinx.HLE;
 using Ryujinx.HLE.HOS.SystemState;
 using Ryujinx.HLE.HOS.Services;
@@ -289,9 +290,9 @@ namespace Ryujinx
 
             ServiceConfiguration.IgnoreMissingServices = SwitchConfig.IgnoreMissingServices;
         }
-       
-        public static void ConfigureHid(Switch device, Configuration SwitchConfig) 
-        {   
+
+        public static void ConfigureHid(Switch device, Configuration SwitchConfig)
+        {
             if (SwitchConfig.JoystickControls.Enabled)
             {
                 if (!Joystick.GetState(SwitchConfig.JoystickControls.Index).IsConnected)

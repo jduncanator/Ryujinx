@@ -3,7 +3,7 @@ using System;
 
 namespace ARMeilleure.Memory
 {
-    public interface IMemoryManager : IMemory, IDisposable
+    public interface IMemoryManager : IDisposable
     {
         void Map(long va, long pa, long size);
 
@@ -13,9 +13,7 @@ namespace ARMeilleure.Memory
 
         long GetPhysicalAddress(long virtualAddress);
 
-        bool IsRegionModified(long position, long size);
-
-        bool TryGetHostAddress(long position, long size, out IntPtr ptr);
+        (ulong, ulong)[] GetModifiedRanges(ulong address, ulong size);
 
         bool IsValidPosition(long position);
 
@@ -25,16 +23,42 @@ namespace ARMeilleure.Memory
 
         int AtomicDecrementInt32(long position);
 
+        sbyte ReadSByte(long position);
+
+        short ReadInt16(long position);
+
+        int ReadInt32(long position);
+
+        long ReadInt64(long position);
+
+        byte ReadByte(long position);
+
+        ushort ReadUInt16(long position);
+
+        uint ReadUInt32(long position);
+
+        ulong ReadUInt64(long position);
+
         byte[] ReadBytes(long position, long size);
 
-        void ReadBytes(long position, byte[] data, int startIndex, int size);
+        void WriteSByte(long position, sbyte value);
+
+        void WriteInt16(long position, short value);
+
+        void WriteInt32(long position, int value);
+
+        void WriteInt64(long position, long value);
+
+        void WriteByte(long position, byte value);
+
+        void WriteUInt16(long position, ushort value);
+
+        void WriteUInt32(long position, uint value);
+
+        void WriteUInt64(long position, ulong value);
 
         void WriteVector128(long position, V128 value);
 
         void WriteBytes(long position, byte[] data);
-
-        void WriteBytes(long position, byte[] data, int startIndex, int size);
-
-        void CopyBytes(long src, long dst, long size);
     }
 }

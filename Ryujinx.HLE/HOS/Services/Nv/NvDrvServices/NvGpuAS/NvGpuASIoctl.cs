@@ -1,6 +1,5 @@
 using ARMeilleure.Memory;
 using Ryujinx.Common.Logging;
-using Ryujinx.Graphics.Memory;
 using Ryujinx.HLE.HOS.Kernel.Process;
 using Ryujinx.HLE.HOS.Services.Nv.NvDrvServices.NvMap;
 using System;
@@ -68,11 +67,11 @@ namespace Ryujinx.HLE.HOS.Services.Nv.NvDrvServices.NvGpuAS
                 // the Offset field holds the alignment size instead.
                 if ((args.Flags & FlagFixedOffset) != 0)
                 {
-                    args.Offset = asCtx.Vmm.ReserveFixed(args.Offset, (long)size);
+                    args.Offset = (long)asCtx.Vmm.ReserveFixed((ulong)args.Offset, size);
                 }
                 else
                 {
-                    args.Offset = asCtx.Vmm.Reserve((long)size, args.Offset);
+                    args.Offset = (long)asCtx.Vmm.Reserve(size, (ulong)args.Offset);
                 }
 
                 if (args.Offset < 0)
@@ -112,7 +111,7 @@ namespace Ryujinx.HLE.HOS.Services.Nv.NvDrvServices.NvGpuAS
 
                 if (asCtx.RemoveReservation(args.Offset))
                 {
-                    asCtx.Vmm.Free(args.Offset, (long)size);
+                    asCtx.Vmm.Free((ulong)args.Offset, size);
                 }
                 else
                 {
@@ -141,7 +140,7 @@ namespace Ryujinx.HLE.HOS.Services.Nv.NvDrvServices.NvGpuAS
                 {
                     if (size != 0)
                     {
-                        asCtx.Vmm.Free(args.Offset, size);
+                        asCtx.Vmm.Free((ulong)args.Offset, (ulong)size);
                     }
                 }
                 else
@@ -185,7 +184,7 @@ namespace Ryujinx.HLE.HOS.Services.Nv.NvDrvServices.NvGpuAS
 
                         pa += args.BufferOffset;
 
-                        if (asCtx.Vmm.Map(pa, va, args.MappingSize) < 0)
+                        if ((long)asCtx.Vmm.Map((ulong)pa, (ulong)va, (ulong)args.MappingSize) < 0)
                         {
                             string msg = string.Format(mapErrorMsg, va, args.MappingSize);
 
@@ -226,7 +225,7 @@ namespace Ryujinx.HLE.HOS.Services.Nv.NvDrvServices.NvGpuAS
                 {
                     if (asCtx.ValidateFixedBuffer(args.Offset, size))
                     {
-                        args.Offset = asCtx.Vmm.Map(pa, args.Offset, size);
+                        args.Offset = (long)asCtx.Vmm.Map((ulong)pa, (ulong)args.Offset, (ulong)size);
                     }
                     else
                     {
@@ -239,7 +238,7 @@ namespace Ryujinx.HLE.HOS.Services.Nv.NvDrvServices.NvGpuAS
                 }
                 else
                 {
-                    args.Offset = asCtx.Vmm.Map(pa, size);
+                    args.Offset = (long)asCtx.Vmm.Map((ulong)pa, (ulong)size);
                 }
 
                 if (args.Offset < 0)
@@ -291,7 +290,7 @@ namespace Ryujinx.HLE.HOS.Services.Nv.NvDrvServices.NvGpuAS
             {
                 NvGpuASRemap args = MemoryHelper.Read<NvGpuASRemap>(context.Memory, inputPosition);
 
-                NvGpuVmm vmm = GetASCtx(context).Vmm;
+                Graphics.Gpu.Memory.MemoryManager vmm = GetASCtx(context).Vmm;
 
                 NvMapHandle map = NvMapIoctl.GetNvMapWithFb(context, args.NvMapHandle);
 
@@ -302,8 +301,8 @@ namespace Ryujinx.HLE.HOS.Services.Nv.NvDrvServices.NvGpuAS
                     return NvResult.InvalidInput;
                 }
 
-                long result = vmm.Map(map.Address, (long)(uint)args.Offset << 16,
-                                                   (long)(uint)args.Pages  << 16);
+                long result = (long)vmm.Map((ulong)map.Address, (ulong)(uint)args.Offset << 16,
+                                                                (ulong)(uint)args.Pages  << 16);
 
                 if (result < 0)
                 {
