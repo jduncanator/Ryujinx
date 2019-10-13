@@ -3,6 +3,7 @@ using LibHac.FsSystem;
 using OpenTK.Input;
 using Ryujinx.Common;
 using Ryujinx.Common.Logging;
+using Ryujinx.Graphics.Gpu;
 using Ryujinx.HLE;
 using Ryujinx.HLE.HOS.SystemState;
 using Ryujinx.HLE.HOS.Services;
