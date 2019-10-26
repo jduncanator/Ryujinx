@@ -13,7 +13,7 @@ namespace ARMeilleure.Memory
 
         long GetPhysicalAddress(long virtualAddress);
 
-        (ulong, ulong)[] GetModifiedRanges(ulong address, ulong size);
+        (ulong, ulong)[] GetModifiedRanges(ulong address, ulong size, int id);
 
         bool IsValidPosition(long position);
 

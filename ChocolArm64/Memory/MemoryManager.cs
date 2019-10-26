@@ -259,7 +259,7 @@ namespace ChocolArm64.Memory
             return ptePtr;
         }
 
-        public unsafe (ulong, ulong)[] GetModifiedRanges(ulong address, ulong size)
+        public unsafe (ulong, ulong)[] GetModifiedRanges(ulong address, ulong size, int id)
         {
             List<(ulong, ulong)> ranges = new List<(ulong, ulong)>();
 

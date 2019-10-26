@@ -58,9 +58,9 @@ namespace Ryujinx.HLE.HOS.Services.Nv.NvDrvServices.NvGpuAS
                 _cpuMemory.WriteBytes((long)address, data.ToArray());
             }
 
-            public (ulong, ulong)[] GetModifiedRanges(ulong address, ulong size)
+            public (ulong, ulong)[] GetModifiedRanges(ulong address, ulong size, ResourceName name)
             {
-                return _cpuMemory.GetModifiedRanges(address, size);
+                return _cpuMemory.GetModifiedRanges(address, size, (int)name);
             }
 
             public int GetPageSize()
