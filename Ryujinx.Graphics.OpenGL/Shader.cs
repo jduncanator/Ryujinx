@@ -30,6 +30,8 @@ namespace Ryujinx.Graphics.OpenGL
                 case ShaderStage.Fragment:               type = ShaderType.FragmentShader;       break;
             }
 
+            System.Console.WriteLine(program.Code);
+
             Handle = GL.CreateShader(type);
 
             GL.ShaderSource(Handle, program.Code);

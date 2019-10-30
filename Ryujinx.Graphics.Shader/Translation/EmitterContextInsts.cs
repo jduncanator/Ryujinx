@@ -106,6 +106,16 @@ namespace Ryujinx.Graphics.Shader.Translation
             return context.Add(Instruction.EndPrimitive);
         }
 
+        public static Operand FindFirstSetS32(this EmitterContext context, Operand a)
+        {
+            return context.Add(Instruction.FindFirstSetS32, Local(), a);
+        }
+
+        public static Operand FindFirstSetU32(this EmitterContext context, Operand a)
+        {
+            return context.Add(Instruction.FindFirstSetU32, Local(), a);
+        }
+
         public static Operand FPAbsNeg(this EmitterContext context, Operand a, bool abs, bool neg)
         {
             return context.FPNegate(context.FPAbsolute(a, abs), neg);

@@ -447,9 +447,27 @@ namespace Ryujinx.Graphics.Gpu.Image
 
                         ITexture newView = texture.HostTexture.CreateView(createInfo, firstLayer, firstLevel);
 
-                        overlap.HostTexture.CopyTo(newView);
+                        overlap.HostTexture.CopyTo(newView, 0, 0);
 
                         overlap.ReplaceView(texture, overlapInfo, newView);
+                    }
+                }
+
+                // If the texture is a 3D texture, we need to additionally copy any slice
+                // of the 3D texture to the newly created 3D texture.
+                if (info.Target == Target.Texture3D)
+                {
+                    foreach (Texture overlap in overlaps)
+                    {
+                        if (texture.IsViewCompatible(
+                            overlap.Info,
+                            overlap.Size,
+                            is2DCompatible: true,
+                            out int firstLayer,
+                            out int firstLevel))
+                        {
+                            overlap.HostTexture.CopyTo(texture.HostTexture, firstLayer, firstLevel);
+                        }
                     }
                 }
             }

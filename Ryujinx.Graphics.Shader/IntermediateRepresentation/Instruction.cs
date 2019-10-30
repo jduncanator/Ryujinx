@@ -43,6 +43,8 @@ namespace Ryujinx.Graphics.Shader.IntermediateRepresentation
         EmitVertex,
         EndPrimitive,
         ExponentB2,
+        FindFirstSetS32,
+        FindFirstSetU32,
         Floor,
         FusedMultiplyAdd,
         ImageLoad,
