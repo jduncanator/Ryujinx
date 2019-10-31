@@ -29,6 +29,7 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Glsl
                    new Dictionary<int, BuiltInAttribute>()
         {
             { AttributeConsts.Layer,               new BuiltInAttribute("gl_Layer",           VariableType.S32)  },
+            { AttributeConsts.ViewportIdx,         new BuiltInAttribute("gl_ViewportIndex",   VariableType.S32)  },
             { AttributeConsts.PointSize,           new BuiltInAttribute("gl_PointSize",       VariableType.F32)  },
             { AttributeConsts.PositionX,           new BuiltInAttribute("gl_Position.x",      VariableType.F32)  },
             { AttributeConsts.PositionY,           new BuiltInAttribute("gl_Position.y",      VariableType.F32)  },
