@@ -346,7 +346,7 @@ namespace ARMeilleure.Instructions
 
         public static void Fcmgt_S(ArmEmitterContext context)
         {
-            if (Optimizations.FastFP && Optimizations.UseSse2)
+            if (false && Optimizations.FastFP && Optimizations.UseSse2)
             {
                 EmitCmpSseOrSse2OpF(context, CmpCondition.GreaterThan, scalar: true);
             }
@@ -358,7 +358,7 @@ namespace ARMeilleure.Instructions
 
         public static void Fcmgt_V(ArmEmitterContext context)
         {
-            if (Optimizations.FastFP && Optimizations.UseSse2)
+            if (false && Optimizations.FastFP && Optimizations.UseSse2)
             {
                 EmitCmpSseOrSse2OpF(context, CmpCondition.GreaterThan, scalar: false);
             }
