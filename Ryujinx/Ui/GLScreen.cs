@@ -288,7 +288,7 @@ namespace Ryujinx.UI
 
         private new void RenderFrame()
         {
-            _renderer.Window.Present();
+            _device.PresentFrame(SwapBuffers);
 
             _device.Statistics.RecordSystemFrameTime();
 
@@ -302,8 +302,6 @@ namespace Ryujinx.UI
                 $"Game Vsync: {(_device.EnableDeviceVsync ? "On" : "Off")}";
 
             _titleEvent = true;
-
-            SwapBuffers();
 
             _device.System.SignalVsync();
 

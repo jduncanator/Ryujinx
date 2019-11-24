@@ -96,6 +96,11 @@ namespace Ryujinx.HLE
             Gpu.DmaPusher.DispatchCalls();
         }
 
+        public void PresentFrame(Action swapBuffersCallback)
+        {
+            Gpu.Window.Present(swapBuffersCallback);
+        }
+
         internal void Unload()
         {
             FileSystem.Dispose();
