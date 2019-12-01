@@ -26,6 +26,11 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Glsl
                 context.AppendLine("#extension GL_ARB_compute_shader : enable");
             }
 
+            if (context.Config.Stage == ShaderStage.Vertex)
+            {
+                context.AppendLine("#extension GL_AMD_vertex_shader_viewport_index : require");
+            }
+
             context.AppendLine();
 
             context.AppendLine($"const int {DefaultNames.UndefinedName} = 0;");

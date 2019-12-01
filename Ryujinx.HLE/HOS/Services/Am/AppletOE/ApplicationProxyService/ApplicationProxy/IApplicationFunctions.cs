@@ -82,6 +82,24 @@ namespace Ryujinx.HLE.HOS.Services.Am.AppletOE.ApplicationProxyService.Applicati
             return ResultCode.Success;
         }
 
+        [Command(26)]
+        public ResultCode GetSaveDataSize(ServiceCtx context)
+        {
+            byte unknown1 = context.RequestData.ReadByte();
+
+            UInt128 uuid = new UInt128(
+                context.RequestData.ReadInt64(),
+                context.RequestData.ReadInt64());
+
+
+            Logger.PrintStub(LogClass.ServiceAm, new { unknown1, uuid });
+
+            context.ResponseData.Write(0L);
+            context.ResponseData.Write(0L);
+
+            return ResultCode.Success;
+        }
+
         [Command(40)]
         // NotifyRunning() -> b8
         public ResultCode NotifyRunning(ServiceCtx context)
